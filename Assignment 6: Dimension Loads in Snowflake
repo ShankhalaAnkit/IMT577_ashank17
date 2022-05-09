@@ -58,168 +58,167 @@ SELECT * FROM DIM_PRODUCT;
 
 -- CREATING LOCATION TABLE
 CREATE OR REPLACE TABLE Dim_Location(
-    DimLocationID INT IDENTITY(1,1) CONSTRAINT PK_DimLocationID PRIMARY KEY NOT NULL --Surrogate Key
-	,SourceLocationID INTEGER IDENTITY(1,1) NOT NULL
-    ,PostalCode VARCHAR(255) NOT NULL 
-    ,Address VARCHAR(255) NOT NULL
-    ,City VARCHAR(255) NOT NULL
-    ,Region VARCHAR(255) NOT NULL
-    ,Country VARCHAR(255) NOT NULL
+DimLocationID INT IDENTITY(1,1) CONSTRAINT PK_DimLocationID PRIMARY KEY NOT NULL --Surrogate Key
+,SourceLocationID INTEGER IDENTITY(1,1) NOT NULL
+,PostalCode VARCHAR(255) NOT NULL 
+,Address VARCHAR(255) NOT NULL
+,City VARCHAR(255) NOT NULL
+,Region VARCHAR(255) NOT NULL
+,Country VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Dim_Location
 (
-    PostalCode
-    ,Address
-    ,City
-    ,Region
-    ,Country
+PostalCode
+,Address
+,City
+,Region
+,Country
 )
 
-        SELECT
-	        PostalCode
-     ,Address
-     ,City
-     ,Region
-     ,Country     
-        FROM (
-       SELECT PostalCode, Address, City, StateProvince AS Region, Country
-       FROM STAGE_CUSTOMER
-       UNION
-       SELECT PostalCode, Address, City, StateProvince AS Region, Country
-       FROM STAGE_STORE
-       UNION
-       SELECT PostalCode, Address, City, StateProvince AS Region, Country
-       FROM STAGE_RESELLER)
+SELECT
+PostalCode
+,Address
+,City
+,Region
+,Country     
+FROM (
+SELECT PostalCode, Address, City, StateProvince AS Region, Country
+FROM STAGE_CUSTOMER
+UNION
+SELECT PostalCode, Address, City, StateProvince AS Region, Country
+FROM STAGE_STORE
+UNION
+SELECT PostalCode, Address, City, StateProvince AS Region, Country
+FROM STAGE_RESELLER)
 
 
 -- CREATING CUSTOMER TABLE
 CREATE OR REPLACE TABLE Dim_Customer(
-    DimCustomerID INT IDENTITY(1,1) CONSTRAINT PK_DimCustomerID PRIMARY KEY NOT NULL 
-    ,DimLocationID INTEGER NOT NULL
-	,SourceCustomerID VARCHAR(255) NOT NULL 
-    ,FullName VARCHAR(255) NOT NULL
-    ,FirstName VARCHAR(255) NOT NULL
-    ,LastName VARCHAR(255) NOT NULL
-    ,Gender VARCHAR(255) NOT NULL  
-    ,EmailAddress VARCHAR(255) NOT NULL  
-    ,PhoneNumber VARCHAR(255) NOT NULL
+DimCustomerID INT IDENTITY(1,1) CONSTRAINT PK_DimCustomerID PRIMARY KEY NOT NULL 
+,DimLocationID INTEGER NOT NULL
+,SourceCustomerID VARCHAR(255) NOT NULL 
+,FullName VARCHAR(255) NOT NULL
+,FirstName VARCHAR(255) NOT NULL
+,LastName VARCHAR(255) NOT NULL
+,Gender VARCHAR(255) NOT NULL  
+,EmailAddress VARCHAR(255) NOT NULL  
+,PhoneNumber VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Dim_Customer
 (
-    DimLocationID
-    ,SourceCustomerID
-    ,FullName
-    ,FirstName
-    ,LastName
-    ,Gender
-    ,EmailAddress
-    ,PhoneNumber
+DimLocationID
+,SourceCustomerID
+,FullName
+,FirstName
+,LastName
+,Gender
+,EmailAddress
+,PhoneNumber
 )
 
-        SELECT
-	        SourceLocationID AS DimLocationID
-     ,CustomerID AS SourceCustomerID
-     ,CONCAT(FirstName , ' ', Lastname) as FullName
-     ,FirstName
-	 ,LastName
-     ,Gender
-     ,EmailAddress
-     ,PhoneNumber
-        
-        FROM STAGE_CUSTOMER C JOIN Dim_Location L on L.PostalCode = C.PostalCode
+SELECT
+SourceLocationID AS DimLocationID
+,CustomerID AS SourceCustomerID
+,CONCAT(FirstName , ' ', Lastname) as FullName
+,FirstName
+ ,LastName
+,Gender
+,EmailAddress
+,PhoneNumber
+
+FROM STAGE_CUSTOMER C JOIN Dim_Location L on L.PostalCode = C.PostalCode
 
 SELECT * FROM Dim_Customer;
 
 -- CREATING RESELLER TABLE 
 CREATE OR REPLACE TABLE Dim_Reseller(
-    DimResellerID INT IDENTITY(1,1) CONSTRAINT PK_DimResellerID PRIMARY KEY NOT NULL 
-    ,DimLocationID INTEGER NOT NULL 
-	,SourceResellerID VARCHAR(255) NOT NULL 
-    ,ResellerName VARCHAR(255) NOT NULL
-    ,ContactName VARCHAR(255) NOT NULL
-    ,PhoneNumber VARCHAR(255) NOT NULL
-    ,Email VARCHAR(255) NOT NULL
+DimResellerID INT IDENTITY(1,1) CONSTRAINT PK_DimResellerID PRIMARY KEY NOT NULL 
+,DimLocationID INTEGER NOT NULL 
+,SourceResellerID VARCHAR(255) NOT NULL 
+,ResellerName VARCHAR(255) NOT NULL
+,ContactName VARCHAR(255) NOT NULL
+,PhoneNumber VARCHAR(255) NOT NULL
+,Email VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Dim_Reseller
 (
-    DimLocationID
-	,SourceResellerID
-    ,ResellerName
-    ,ContactName
-    ,PhoneNumber
-    ,Email
+DimLocationID
+,SourceResellerID
+,ResellerName
+,ContactName
+,PhoneNumber
+,Email
 )
 
-        SELECT
-	     SourceLocationID AS DimLocationID
-     ,ResellerID AS SourceResellerID
-     ,ResellerName AS ResellerName
-     ,Contact AS ContactName
-     ,PhoneNumber As PhoneNumber
-     ,EmailAddress AS Email
-        
-        FROM STAGE_RESELLER R INNER JOIN Dim_Location L on L.PostalCode = TO_NUMBER(R.PostalCode)
+SELECT
+SourceLocationID AS DimLocationID
+,ResellerID AS SourceResellerID
+,ResellerName AS ResellerName
+,Contact AS ContactName
+,PhoneNumber As PhoneNumber
+,EmailAddress AS Email
+
+FROM STAGE_RESELLER R INNER JOIN Dim_Location L on L.PostalCode = TO_NUMBER(R.PostalCode)
 
 SELECT * FROM DiM_RESELLER;
 
 
 -- CREATING STORE TABLE
 CREATE OR REPLACE TABLE Dim_Store(
-    DimStoreID INT IDENTITY(1,1) CONSTRAINT PK_DimStoreID PRIMARY KEY NOT NULL --Surrogate Key
-    ,DimLocationID INTEGER NOT NULL --Surrogate Key
-	,SourceStoreID INTEGER NOT NULL --Natural Key
-    ,StoreNumber INTEGER NOT NULL
-    ,StoreManager VARCHAR(255) NOT NULL
+DimStoreID INT IDENTITY(1,1) CONSTRAINT PK_DimStoreID PRIMARY KEY NOT NULL --Surrogate Key
+,DimLocationID INTEGER NOT NULL --Surrogate Key
+,SourceStoreID INTEGER NOT NULL --Natural Key
+,StoreNumber INTEGER NOT NULL
+,StoreManager VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Dim_Store
 (
-     DimStoreID
-	,DimLocationID
-    ,SourceStoreID
-    ,StoreNumber
-    ,StoreManager
+DimStoreID
+,DimLocationID
+,SourceStoreID
+,StoreNumber
+,StoreManager
 )
 
-        SELECT
-	        StoreID AS DimStoreID
-     ,SourceLocationID AS DimLocationID
-     ,StoreID AS SourceStoreID
-     ,StoreNumber
-     ,StoreManager 
-     
-        FROM STAGE_STORE S JOIN Dim_Location L on L.PostalCode = S.PostalCode
+SELECT
+StoreID AS DimStoreID
+,SourceLocationID AS DimLocationID
+,StoreID AS SourceStoreID
+,StoreNumber
+,StoreManager 
+
+FROM STAGE_STORE S JOIN Dim_Location L on L.PostalCode = S.PostalCode
 
 SELECT * FROM Dim_Store;
 
 -- CREATING CHANNEL TABLE
 CREATE OR REPLACE TABLE Dim_Channel(
-    DimChannelID INT IDENTITY(1,1) CONSTRAINT PK_DimChannelID PRIMARY KEY NOT NULL --Surrogate Key
-	,SourceChannelID INTEGER NOT NULL --Natural Key
-    ,SourceChannelCategoryID INTEGER NOT NULL --Natural Key
-    ,ChannelName VARCHAR(255) NOT NULL
-    ,ChannelCategory VARCHAR(255) NOT NULL
+DimChannelID INT IDENTITY(1,1) CONSTRAINT PK_DimChannelID PRIMARY KEY NOT NULL --Surrogate Key
+,SourceChannelID INTEGER NOT NULL --Natural Key
+,SourceChannelCategoryID INTEGER NOT NULL --Natural Key
+,ChannelName VARCHAR(255) NOT NULL
+,ChannelCategory VARCHAR(255) NOT NULL
 );
 
 INSERT INTO Dim_Channel
 (
-     DimChannelID
-	,SourceChannelID
-    ,SourceChannelCategoryID
-    ,ChannelName
-    ,ChannelCategory
+DimChannelID
+,SourceChannelID
+,SourceChannelCategoryID
+,ChannelName
+,ChannelCategory
 )
 
-
-        SELECT
-	        SC.ChannelID AS DimChannelID
-     ,SC.ChannelID AS SourceChannelID
-     ,SC.ChannelCategoryID AS SourceChannelCategoryID
-     ,SC.Channel AS ChannelName
-     ,SCC.ChannelCategory AS ChannelCategory   
-        FROM STAGE_CHANNEL SC JOIN STAGE_CHANNELCATEGORY SCC ON SCC.ChannelCategoryID = SC.ChannelCategoryID
+SELECT
+SC.ChannelID AS DimChannelID
+,SC.ChannelID AS SourceChannelID
+,SC.ChannelCategoryID AS SourceChannelCategoryID
+,SC.Channel AS ChannelName
+,SCC.ChannelCategory AS ChannelCategory   
+FROM STAGE_CHANNEL SC JOIN STAGE_CHANNELCATEGORY SCC ON SCC.ChannelCategoryID = SC.ChannelCategoryID
 
 SELECT * FROM Dim_Channel;
