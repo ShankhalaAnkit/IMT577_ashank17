@@ -49,11 +49,158 @@ INNER JOIN
 VIEW_DIM_DATE AS VDD
 ON VDD.DATE_PKEY = A.DIMSALEdateid;
 
+---------------------------------------------------------------
+-- VIEW FOR STORE PROFIT DATA  
+---------------------------------------------------------------
 
-CREATE VIEW AnnualStoreProfit AS
-SELECT VDS.StoreNumber, VDD.YEAR, SUM(VFSA.SaleTotalProfit) AS TotalProfit
-FROM View_Fact_SalesActual VFSA
-JOIN Dim_Date VDD on VFSA.DimSaleDateID = VDD.DATE_PKEY
-JOIN Dim_Store VDS on VFSA.DimStoreID = VDS.DimStoreID
-WHERE VFSA.DimStoreID IN (SELECT VDS.DimStoreID FROM Dim_store VDS WHERE VDS.StoreNumber = 5 OR VDS.StoreNumber = 8)
-GROUP BY VDD.YEAR, VDS.StoreNumber
+CREATE OR REPLACE SECURE VIEW VIEW_ANNUAL_STORE_PROFIT 
+AS
+SELECT DS.STORENUMBER, VDD.YEAR, VDD.MONTH_NAME, VDD.DAY_NAME,VDD.DATE,SUM(VFSA.SALETOTALPROFIT) AS TOTAL_PROFIT
+FROM VIEW_FACT_SALESACTUAL VFSA
+INNER JOIN VIEW_DIM_DATE AS VDD
+ON VFSA.DIMSALEDATEID = VDD.DATE_PKEY
+INNER JOIN VIEW_DIM_STORE DS
+ON DS.DIMSTOREID = VFSA.DIMSTOREID
+WHERE VFSA.DIMSTOREID IN (SELECT DIMSTOREID FROM DIM_STORE WHERE STORENUMBER IN (10,21))
+GROUP BY 1,2,3,4,5;
+
+
+-- Creating View for Visualization 
+
+CREATE OR REPLACE SECURE VIEW view_fact_salesactual
+as
+select 
+  DimProductID,
+  DimStoreID,
+  DimResellerID,
+  DimCustomerID,
+  DimChannelID,
+  DimSaleDateID,
+  DimLocationID,
+  SourceSalesHeaderID,
+  SourceSalesDetailID,
+  SaleAmount,
+  SaleQuantity,
+  SaleUnitPrice,
+  SaleExtendedCost,
+  SaleTotalProfit
+From Fact_SalesActual;
+
+CREATE OR REPLACE SECURE VIEW view_fact_SRCSalesTarget
+as 
+select
+  DimStoreID,
+  DimResellerID,
+  DimChannelID,
+  DimTargetDateID,
+  SalestargetAmount
+From Fact_SRCSalestarget;
+
+CREATE OR REPLACE SECURE VIEW view_fact_ProductSalesTarget
+as
+select
+    DimProductID,
+    DimTargetDateID,
+    ProducttargetargetSalesQuantity
+from fact_productsalestarget;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_CHANNEL
+AS
+SELECT  
+        DIMCHANNELID, 
+        SOURCECHANNELID, 
+        SOURCECHANNELCATEGORYID, 
+        CHANNELNAME, 
+        CHANNELCATEGORY
+FROM DIM_CHANNEL;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_CUSTOMER
+AS
+SELECT  
+        DIMCUSTOMERID, 
+        DIMLOCATIONID, 
+        SOURCECUSTOMERID, 
+        FULLNAME, 
+        FIRSTNAME,
+        LASTNAME,
+        GENDER,
+        EMAILADDRESS,
+        PHONENUMBER
+FROM DIM_CUSTOMER;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_DATE
+AS
+SELECT 
+        DATE_PKEY,
+        DATE,
+        FULL_DATE_DESC,
+        DAY_NUM_IN_WEEK,
+        DAY_NUM_IN_MONTH,
+        DAY_NUM_IN_YEAR,
+        DAY_NAME,
+        DAY_ABBREV,
+        WEEKDAY_IND,
+        US_HOLIDAY_IND,
+        _HOLIDAY_IND,
+        MONTH_END_IND,
+        WEEK_BEGIN_DATE_NKEY,
+        WEEK_BEGIN_DATE,
+        WEEK_END_DATE_NKEY,
+        WEEK_END_DATE,
+        WEEK_NUM_IN_YEAR,
+        MONTH_NAME,
+        MONTH_ABBREV,
+        MONTH_NUM_IN_YEAR,
+        YEARMONTH,
+        QUARTER,
+        YEARQUARTER,
+        YEAR,
+        FISCAL_WEEK_NUM,
+        FISCAL_MONTH_NUM,
+        FISCAL_YEARMONTH,
+        FISCAL_QUARTER,
+        FISCAL_YEARQUARTER,
+        FISCAL_HALFYEAR,
+        FISCAL_YEAR,
+        SQL_TIMESTAMP,
+        CURRENT_ROW_IND,
+        EFFECTIVE_DATE,
+        EXPIRATION_DATE
+FROM DIM_DATE;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_PRODUCT
+AS
+SELECT
+    SOURCEPRODUCTID,
+    SOURCEPRODUCTTYPEID,
+    SOURCEPRODUCTCATEGORYID,
+    PRODUCTNAME,
+    PRODUCTTYPE,
+    PRODUCTCATEGORY,
+    PRODUCTRETAILPRICE,
+    PRODUCTWHOLESALEPRICE,
+    PRODUCTCOST,
+    PRODUCTRETAILPROFIT,
+    PRODUCTWHOLESALEUNITPROFIT,
+    PRODUCTPROFITMARGINUNITPERCENT
+FROM DIM_PRODUCT;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_STORE
+AS
+SELECT
+     DimStoreID
+	,DimLocationID
+    ,SourceStoreID
+    ,StoreNumber
+    ,StoreManager
+FROM DIM_STORE;
+
+CREATE OR REPLACE SECURE VIEW VIEW_DIM_LOCATION
+AS
+SELECT
+    PostalCode
+    ,Address
+    ,City
+    ,Region
+    ,Country
+FROM DIM_LOCATION;
